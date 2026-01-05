@@ -1,0 +1,2 @@
+# Predicting-Fraudulent-Credit-Card-Charges-with-Machine-Learning-Models.
+Detect fraud in a 1.8M record dataset (0.52% fraud rate). This ML project uses SMOTE and feature engineering (temporal/geographic) to tackle class imbalance. Evaluated Logistic Regression, Random Forest, and XGBoost, with XGBoost achieving 98.89% recall. Designed to prioritize catching fraud over accuracy to minimize financial risk..
