@@ -76,7 +76,7 @@ The models were evaluated primarily on their ability to capture fraudulent activ
 1. XGBoost: The top-performing model, achieving an exceptional Recall of 0.9889.
  <img width="520" height="416" alt="image" src="https://github.com/user-attachments/assets/3ac44eaa-25d0-456c-a2b2-19d2d7045600" />
 
- This gradient-boosted decision tree algorithm was the top performer, achieving an exceptional Recall of 0.9889. It proved to be the most effective at identifying complex,   non-linear fraud patterns while maintaining high operational speed.
+XGBoost model results. The model achieves extremely high recall (0.992), correctly identifying nearly all fraudulent transactions, with a significant reduction in false negatives compared to previous models.
 
 
 
@@ -85,16 +85,14 @@ The models were evaluated primarily on their ability to capture fraudulent activ
 
 <img width="504" height="391" alt="image" src="https://github.com/user-attachments/assets/ade227cd-dbcb-4896-ae7c-86bca92bc5e9" />
 
-
-This ensemble method, which builds multiple decision trees to improve accuracy, achieved a Recall of 0.8610. While robust, it was less sensitive than XGBoost in         detecting the minority fraud class within the synthetic training environment.
-
+Random Forest model using a 30% subsample of the SMOTE‑balanced data. The model improves both balanced accuracy and precision compared to Logistic Regression, while maintaining strong recall.”
 
 
 
 3. Logistic Regression: Served as the baseline with a Recall of 0.7958.
  <img width="486" height="394" alt="image" src="https://github.com/user-attachments/assets/891a2396-4504-432d-b5c2-7a558e528df2" />
 
- Used as a linear baseline, this model predicts probabilities based on a logistic function and achieved a Recall of 0.7958. The results confirmed that a simple linear approach is insufficient for capturing the nuances of extreme class imbalance.
+Logistic Regression baseline model. The model achieves strong recall but struggles with precision, correctly identifying most fraud cases while generating many false positives. This establishes a linear benchmark for comparison with more complex models.
 
 
 
@@ -119,29 +117,36 @@ These results were further cross-referenced with SHAP values, which highlighted 
 
 While all models maintained high balanced accuracy, the F1-Score for XGBoost (0.2032) reflects a high number of false positives. This was a deliberate strategic choice: in fraud detection, the financial and security cost of a "False Negative" (missing actual fraud) is far greater than the operational cost of a "False Positive" (requesting additional verification for a legitimate user).
 
-## RECOMMENDATIONS
-Based on the high performance of the machine learning models and the specific insights gained from the feature importance analysis, the following actions are recommended for deployment and long-term maintenance:
+## Recommendations for Improving Fraud Detection
+1. Optimize the Classification Threshold
+The XGBoost model achieves extremely high recall but relatively low precision. Adjusting the probability threshold (instead of using the default 0.5) can help balance false positives and false negatives based on business needs. This is especially useful in fraud detection, where the cost of missing fraud is much higher than the cost of flagging a genuine transaction.
 
-#### Model Deployment 
-Deploy the XGBoost model as the primary detection engine. Its 98.89% recall rate ensures that the vast majority of fraudulent transactions are flagged before they can cause significant financial loss.
+2. Introduce a Fraud Risk Scoring System
+Instead of producing a simple fraud/not‑fraud label, the model can output a continuous fraud‑risk score. This allows banks to prioritize investigations, apply tiered alerts, and reduce unnecessary manual reviews.
 
-Use a real-time scoring API to integrate the model directly into the transaction processing pipeline, allowing for sub-second decision-making.
+3. Explore Hybrid Resampling Techniques
+While SMOTE improved recall significantly, hybrid methods such as SMOTE + Tomek Links or SMOTEENN can help remove noisy synthetic samples and improve precision. These techniques clean the decision boundary and often lead to more stable predictions.
 
-### Threshold Optimization 
-Management should perform a cost-benefit analysis to determine the optimal classification threshold.
+4. Engineer Additional Behavioral Features
+Fraud is often behavioral rather than purely transactional. Adding features such as transaction velocity, spending deviation from personal norms, merchant frequency, or distance from previous transactions can further strengthen model performance.
 
-Since the current F1-Score (0.2032) indicates high false positives, fine-tuning the probability cutoff can help reduce customer friction (e.g., declined cards for legitimate purchases) while maintaining a high safety net for actual fraud.
+5. Apply Cost‑Sensitive Learning
+Fraud detection is inherently cost‑imbalanced. Incorporating cost‑sensitive learning—either through adjusted class weights or custom loss functions—can help the model prioritize fraud cases more effectively without relying solely on resampling.
 
-### Layered Defense Strategy
-Algorithmic detection should be the first line of defense. For transactions flagged as "high risk" by the model, implement automated secondary verification steps: * Multi-Factor Authentication (MFA): Trigger a mobile app push or SMS code for suspicious high-value shopping. * Biometric Prompts: Require a fingerprint or face ID for transactions flagged due to "unreasonable" merchant distance.
+6. Consider an Ensemble Approach
+Each model captures different fraud patterns. Combining Logistic Regression, Random Forest, and XGBoost into a stacked ensemble could improve robustness and reduce model variance, especially in edge‑case transactions.
 
-### Continuous Model Evolution
-Feedback Loops: Establish a pipeline to feed confirmed fraud cases back into the training data. This ensures the model learns from new, emerging fraud tactics—such as shifts in merchant category trends or evolving "card-not-present" techniques.
+7. Monitor Model Drift Over Time
+Fraud patterns evolve quickly. Implementing regular model retraining, drift detection, and performance monitoring ensures the system remains accurate as new fraud strategies emerge.
 
-### Drift Monitoring
-Regularly monitor features like "Geographic Distance" and "Transaction Amount." Significant shifts in consumer behavior (e.g., a sudden increase in remote work or international travel) can cause model performance to degrade over time.
+8. Integrate Explainability into Deployment
+SHAP values provide clear insight into why a transaction was flagged. Including these explanations in dashboards or analyst tools increases trust, transparency, and the usefulness of the model in real‑world fraud investigations.
 
-### Focus on High-Risk Categories
-Given that grocery_pos, shopping_net, and shopping_pos were identified as top-tier predictors (Rank 1 in RFE), the fraud investigation team should prioritize manual audits or stricter verification rules for these specific merchant categories
+9. Use Precision–Recall AUC for Evaluation
+Given the extreme class imbalance, PR‑AUC is a more informative metric than ROC‑AUC. Incorporating PR‑AUC into model evaluation will give a clearer picture of performance on rare fraud cases.
+
+10. Prepare for Real‑Time Scoring
+If deployed in production, the model must operate under strict latency requirements. Ensuring that feature engineering steps (such as distance and time‑based features) can be computed in real time is essential for preventing fraudulent transactions before approval.
+
 
 
